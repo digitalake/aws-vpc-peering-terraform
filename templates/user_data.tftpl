@@ -1,0 +1,8 @@
+#!/bin/bash
+apt update -y
+apt install -y nginx
+
+systemctl start nginx
+systemctl enable nginx
+
+echo "<html><head><title>Instance Info</title></head><body><h1>This is ${SERVER}</h1></body></html>" > /var/www/html/index.html
