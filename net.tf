@@ -1,40 +1,45 @@
-resource "aws_internet_gateway" "my_igw" {
-  for_each = var.web_servers
-  vpc_id   = aws_vpc.web_srv_vpc[each.key].id
+resource "aws_internet_gateway" "vpc_igw" {
+  for_each = var.networks
+  vpc_id   = aws_vpc.web_server_vpc[each.key].id
 }
 
 resource "aws_route" "route_to_igw" {
   for_each               = var.web_servers
   route_table_id         = aws_route_table.peering_route[each.key].id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.my_igw[each.key].id
+  gateway_id             = aws_internet_gateway.vpc_igw[each.key].id
 }
 
-resource "aws_vpc" "web_srv_vpc" {
-  for_each   = var.web_servers
-  cidr_block = each.value.vpc_cidr
+resource "aws_vpc" "web_server_vpc" {
+  for_each   = var.networks
+  cidr_block = each.value.cidr_block
   tags = {
-    Name = "${each.key}-vpc"
+    Name = "${each.key}"
   }
 }
 
 resource "aws_subnet" "web_server_subnet" {
-  for_each          = var.web_servers
-  vpc_id            = aws_vpc.web_srv_vpc[each.key].id
+  for_each = {
+    for network_subnet in local.network_subnet : network_subnet.subnet_key => network_subnet
+  }
+  vpc_id            = aws_vpc.web_server_vpc[each.value.network_key].id
   cidr_block        = each.value.subnet_cidr
   availability_zone = var.avaliability_zone
   tags = {
-    Name = "${each.key}-private-subnet"
+    Name = "${each.key}"
   }
 }
 
 resource "aws_vpc_peering_connection" "peering_connections" {
-  for_each    = var.web_servers
-  peer_vpc_id = aws_vpc.web_srv_vpc[each.value.accepter_peering_friend_key].id
-  vpc_id      = aws_vpc.web_srv_vpc[each.key].id
+  for_each = {
+    for connection in local.transformed_peering_scheme : "${connection.source}-${connection.target}" => connection 
+  }
+  peer_vpc_id = aws_vpc.web_server_vpc[each.value.target].id
+  vpc_id      = aws_vpc.web_server_vpc[each.value.source].id
   auto_accept = true
+
   tags = {
-    Name = "${each.key}-${each.value.accepter_peering_friend_key}-peering"
+    Name = "${each.value.source}-${each.value.target}-peering"
   }
 }
 
