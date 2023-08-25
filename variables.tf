@@ -14,3 +14,14 @@ variable "avaliability_zone" {
   type    = string
   default = "us-east-1a"
 }
+
+variable "networks" {
+  type = map(object({
+    cidr_block = string
+    peering_to = list(string)
+    is_peered_by = list(string)
+    subnet = map(object({
+      cidr_block = string
+    }))
+  }))
+}
