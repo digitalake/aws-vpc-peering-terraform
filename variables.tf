@@ -1,8 +1,11 @@
 variable "web_servers" {
   type = map(object({
-    instance_type                = string
-    ami                          = string
-    pub_key_path                 = string
+    instance_type = string
+    ami           = string
+    pub_key_path  = string
+    vpc_key = string
+    subnet_key    = string
+    #    security_group = map(any)
   }))
 }
 
@@ -13,7 +16,7 @@ variable "avaliability_zone" {
 
 variable "networks" {
   type = map(object({
-    cidr_block   = string
+    cidr_block = string
     subnets = map(object({
       cidr_block = string
     }))
@@ -21,5 +24,8 @@ variable "networks" {
 }
 
 variable "peering_scheme" {
-  type = map(list(string))
+  type = map(object({
+    peering_accepters  = list(string)
+    peering_requesters = list(string)
+  }))
 }

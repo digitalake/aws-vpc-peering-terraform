@@ -9,11 +9,20 @@ locals {
     ]
   ])
 
-  transformed_peering_scheme = flatten([
-    for source, targets in var.peering_scheme : [
-      for target in targets : {
-        source = source,
-        target = target
+  peering_pairs_outbound = flatten([
+    for vpc, scheme in var.peering_scheme : [
+      for target in scheme.peering_accepters : {
+        requester = vpc
+        accepter  = target
+      }
+    ]
+  ])
+
+  peering_pairs_inbound = flatten([
+    for vpc, scheme in var.peering_scheme : [
+      for hunter in scheme.peering_requesters : {
+        requester = hunter
+        accepter  = vpc
       }
     ]
   ])
