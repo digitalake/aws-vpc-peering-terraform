@@ -1,21 +1,21 @@
 web_servers = {
   "server1" = {
     subnet_key    = "vpc1subnet"
-    vpc_key = "vpc1"
+    vpc_key       = "vpc1"
     instance_type = "t2.micro"
     ami           = "ami-02675d30b814d1daa"
     pub_key_path  = "/home/vanadium/.ssh/virt.pub"
   },
   "server2" = {
     subnet_key    = "vpc2subnet"
-    vpc_key = "vpc2"
+    vpc_key       = "vpc2"
     instance_type = "t2.micro"
     ami           = "ami-02675d30b814d1daa"
     pub_key_path  = "/home/vanadium/.ssh/virt.pub"
   },
   "server3" = {
     subnet_key    = "vpc3subnet"
-    vpc_key = "vpc3"
+    vpc_key       = "vpc3"
     instance_type = "t2.micro"
     ami           = "ami-02675d30b814d1daa"
     pub_key_path  = "/home/vanadium/.ssh/virt.pub"

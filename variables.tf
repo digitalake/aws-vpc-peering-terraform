@@ -3,9 +3,8 @@ variable "web_servers" {
     instance_type = string
     ami           = string
     pub_key_path  = string
-    vpc_key = string
+    vpc_key       = string
     subnet_key    = string
-    #    security_group = map(any)
   }))
 }
 

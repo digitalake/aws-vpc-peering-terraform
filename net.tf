@@ -31,7 +31,6 @@ resource "aws_subnet" "web_server_subnet" {
 }
 
 resource "aws_vpc_peering_connection" "peerings" {
-#  for_each = toset(local.peering_pairs_outbound)
   for_each = {
     for pair in local.peering_pairs_outbound :
     "${pair.requester}" => pair
@@ -51,7 +50,7 @@ resource "aws_route_table" "vpc_route_table" {
 }
 
 resource "aws_route" "outbound_peering_routes" {
-  for_each                  = {
+  for_each = {
     for pair in local.peering_pairs_outbound :
     "${pair.requester}-${pair.accepter}" => pair
   }
@@ -61,7 +60,7 @@ resource "aws_route" "outbound_peering_routes" {
 }
 
 resource "aws_route" "inbound_peering_routes" {
-  for_each                  = {
+  for_each = {
     for pair in local.peering_pairs_inbound :
     "${pair.accepter}-${pair.requester}" => pair
   }
