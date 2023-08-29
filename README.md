@@ -1,6 +1,6 @@
 # <h1 align="center">VPC Peering task</a>
 ### About
-The Terraform code in this repo is designed to create instances in different VPCs with VPC-peering connections. Additionally the user_data script installs and starts the NginX Web Server.
+The Terraform code in this repo is designed to create instances in different VPCs with VPC-peering connections. Additionally the user_data script installs and starts the NginX Web Server. The idea i tried to follow is being able to change the number of peering vpcs and hosts there quickly by only changing the .tfvars. The SGs are created independently for each instance was created, same with the routing tables.
 
 ### The scheme of the resources: 
 > I added the Route tables screenshots from AWS Console
@@ -14,19 +14,57 @@ In this configuration i've used the _map(object)_ variable type to define the co
 ```
 variable "web_servers" {
   type = map(object({
-    vpc_cidr                     = string
-    subnet_cidr                  = string
-    instance_type                = string
-    ami                          = string
-    pub_key_path                 = string
-    accepter_peering_friend_key  = string # use one of existing web_servers map's keys
-    requester_peering_friend_key = string # use one of existing web_servers map's keys
+    instance_type = string
+    ami           = string
+    pub_key_path  = string
+    vpc_key       = string 
+    subnet_key    = string
   }))
+}
+```
+
+For the network configuration i'm using such variable:
+```
+variable "networks" {
+  type = map(object({
+    cidr_block = string
+    subnets = map(object({
+      cidr_block = string
+    }))
+  }))
+}
+```
+The subnet's map of object is used for adding optional tags.
+
+For the peering config i decided to implement such variable:
+```
+variable "peering_scheme" {
+  type = map(object({
+    peering_accepters  = list(string)
+    peering_requesters = list(string)
+  }))
+}
+```
+An example of the value (there can be more values for each list, here the vpc number is 3 so no more needed):
+```
+peering_scheme = {
+  "vpc1" = {
+    peering_accepters  = ["vpc2"] --> used for defining the targets for creating peering connections FROM the vpc1
+    peering_requesters = ["vpc3"] --> used for defining the VPCs of the incomming peering connections TO the vpc1
+  },
+  "vpc2" = {
+    peering_accepters  = ["vpc3"]
+    peering_requesters = ["vpc1"]
+  },
+  "vpc3" = {
+    peering_accepters  = ["vpc1"]
+    peering_requesters = ["vpc2"]
+  }
 }
 ```
  After the apply i have useful outputs:
  
-<img src="https://github.com/digitalake/aws-vpc-peering-terraform/assets/109740456/24499c67-8303-4b27-b74a-0c1a750ebb64" width="550">
+<img src="https://github.com/digitalake/aws-vpc-peering-terraform/assets/109740456/23a84981-4567-4a11-b1ec-927bb8f7f0b1" width="550">
 
 The user_data script rewrites the default index.html to show the web_servers key form the map variable, to achive it i've created a template user_data.tftpl:
 
