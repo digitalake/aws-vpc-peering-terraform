@@ -22,6 +22,7 @@ resource "aws_security_group" "basic" {
   }
 }
 
+# dynamic sg for each of instances to allow connections via peering
 resource "aws_security_group" "allow_peering_mesh" {
   for_each = var.peering_scheme
   name     = "${each.key}-peering_mesh"
