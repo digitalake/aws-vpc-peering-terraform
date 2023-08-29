@@ -1,3 +1,5 @@
+avaliability_zone = "us-east-1a"
+
 web_servers = {
   "server1" = {
     subnet_key    = "vpc1subnet"
